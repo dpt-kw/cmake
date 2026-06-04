@@ -21,7 +21,37 @@
             "text": "Example error"
           },
           "ruleId": "CMake.FatalError",
-          "ruleIndex": 0
+          "ruleIndex": 0,
+          "stacks": [
+            {
+              "frames": [
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/ProjectFatalError.cmake"
+                      },
+                      "region": {
+                        "startLine": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/CMakeLists.txt"
+                      },
+                      "region": {
+                        "startLine": 3
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
       ],
       "tool": {

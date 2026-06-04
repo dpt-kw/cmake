@@ -2,65 +2,311 @@
   "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json",
   "runs": [
     {
-    "results": [
-      {
-      "level": "warning",
-      "locations": [
+      "results": [
         {
-        "physicalLocation": {
-          "artifactLocation": {
-          "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
-          },
-          "region": {
-          "startLine": 2
-          }
-        }
-        }
-      ],
-      "message": {
-        "text": "Example warning message"
-      },
-      "ruleId": "CMake.Warning",
-      "ruleIndex": 0
-      },
-      {
-        "level": "warning",
-        "locations": [
-          {
-          "physicalLocation": {
-            "artifactLocation": {
-            "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
-            },
-            "region": {
-            "startLine": 5
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
             }
-          }
-          }
-        ],
-        "message": {
-          "text": "A second example warning message"
+          ],
+          "message": {
+            "text": "Example warning message"
+          },
+          "ruleId": "CMake.Warning",
+          "ruleIndex": 0,
+          "stacks": [
+            {
+              "frames": [
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 2
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/CMakeLists.txt"
+                      },
+                      "region": {
+                        "startLine": 3
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         },
-        "ruleId": "CMake.Warning",
-        "ruleIndex": 0
-      }
-    ],
-    "tool": {
-      "driver": {
-      "name": "CMake",
-      "rules": [
         {
-        "id": "CMake.Warning",
-        "messageStrings": {
-          "default": {
-          "text": "CMake Warning: {0}"
-          }
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "A second example warning message"
+          },
+          "ruleId": "CMake.Warning",
+          "ruleIndex": 0,
+          "stacks": [
+            {
+              "frames": [
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 5
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/CMakeLists.txt"
+                      },
+                      "region": {
+                        "startLine": 3
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         },
-        "name": "CMake Warning"
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults-included-source.cmake"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Result from other source file"
+          },
+          "ruleId": "CMake.Warning",
+          "ruleIndex": 0,
+          "stacks": [
+            {
+              "frames": [
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults-included-source.cmake"
+                      },
+                      "region": {
+                        "startLine": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 10
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/CMakeLists.txt"
+                      },
+                      "region": {
+                        "startLine": 3
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                },
+                "region": {
+                  "startLine": 15
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Warning from function call"
+          },
+          "ruleId": "CMake.Warning",
+          "ruleIndex": 0,
+          "stacks": [
+            {
+              "frames": [
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 15
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 17
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/CMakeLists.txt"
+                      },
+                      "region": {
+                        "startLine": 3
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                },
+                "region": {
+                  "startLine": 24
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Watch: SARIF_WATCHED_VAR was MODIFIED_ACCESS"
+          },
+          "ruleId": "CMake.Warning",
+          "ruleIndex": 0,
+          "stacks": [
+            {
+              "frames": [
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 24
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/GenerateSarifResults.cmake"
+                      },
+                      "region": {
+                        "startLine": 27
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "PATH:<SOURCE_DIR>/CMakeLists.txt"
+                      },
+                      "region": {
+                        "startLine": 3
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
         }
       ],
-      "version": "<IGNORE>"
+      "tool": {
+        "driver": {
+          "name": "CMake",
+          "rules": [
+            {
+              "id": "CMake.Warning",
+              "messageStrings": {
+                "default": {
+                  "text": "CMake Warning: {0}"
+                }
+              },
+              "name": "CMake Warning"
+            }
+          ],
+          "version": "<IGNORE>"
+        }
       }
-    }
     }
   ],
   "version": "2.1.0"

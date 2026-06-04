@@ -8,4 +8,26 @@ CMake Warning at GenerateSarifResults\.cmake:5 \(message\):
   A second example warning message
 Call Stack \(most recent call first\):
   ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Warning at GenerateSarifResults-included-source\.cmake:1 \(message\):
+  Result from other source file
+Call Stack \(most recent call first\):
+  GenerateSarifResults\.cmake:10 \(include\)
+  ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Warning at GenerateSarifResults\.cmake:15 \(message\):
+  Warning from function call
+Call Stack \(most recent call first\):
+  GenerateSarifResults\.cmake:17 \(sarif_demo_warning\)
+  ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Warning at GenerateSarifResults\.cmake:24 \(message\):
+  Watch: SARIF_WATCHED_VAR was MODIFIED_ACCESS
+Call Stack \(most recent call first\):
+  GenerateSarifResults\.cmake:[0-9]+ \(sarif_watch_cb\)
+  GenerateSarifResults\.cmake:27 \(set\)
+  ToggleExportSarifVariable\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)$

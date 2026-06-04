@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSarifLog.h"
 
+#include <limits>
 #include <memory>
 #include <stdexcept>
 
@@ -93,6 +94,7 @@ void cmSarif::ResultsLog::LogMessage(
   this->Log(cmSarif::Result{
     text, cmSarif::SourceFileLocation::FromBacktrace(backtrace),
     cmSarif::MessageSeverityLevel(t), cmSarif::MessageRuleId(t), cm::nullopt,
+    std::vector<Stack> { Stack::FromBacktrace(backtrace) },
     additionalProperties });
 }
 
@@ -119,6 +121,30 @@ std::size_t cmSarif::ResultsLog::UseRule(std::string const& id) const
   this->RuleToIndex[id] = idx;
   this->EnabledRules.emplace_back(id);
   return idx;
+}
+
+cmSarif::Stack cmSarif::Stack::FromBacktrace(
+  cmListFileBacktrace const& backtrace)
+{
+  Stack stack;
+
+  cmListFileBacktrace current = backtrace;
+  while (!current.Empty()) {
+    auto t = current.Top();
+    // The CMake stack has a line 0 entry for each list file jumped into in addition to
+    // the `include()` call and whatever command is being processed. Only add
+    // stack frames for actual function calls.
+    if (t.Line > 0) {
+      auto maybeBt = cmSarif::SourceFileLocation::FromBacktrace(current);
+      if (maybeBt) {
+        stack.Frames.emplace_back(StackFrame{
+        *maybeBt, {}});
+      }
+    }
+
+    current = current.Pop();
+  }
+  return stack;
 }
 
 cmSarif::ResultSeverityLevel cmSarif::MessageSeverityLevel(MessageType t)
@@ -193,7 +219,11 @@ cmSarif::SourceFileLocation::FromBacktrace(
     return cm::nullopt;
   }
   cmListFileContext const& lfc = backtrace.Top();
-  if (lfc.Line <= 0 || lfc.FilePath.empty()) {
+  // Exclude frames with no real location: negative lines are deferred-call
+  // placeholders, and LONG_MAX is the synthetic line used by variable_watch
+  // callback dispatch. Neither is a meaningful source location.
+  if (lfc.Line <= 0 || lfc.FilePath.empty() ||
+      lfc.Line == std::numeric_limits<long>::max()) {
     return cm::nullopt;
   }
 
@@ -268,6 +298,27 @@ void cmSarif::ResultsLog::WriteJson(Json::Value& root) const
                 ["uri"] = (res.Location)->Uri;
       jsonResult["locations"][0]["physicalLocation"]["region"]["startLine"] =
         Json::Int64((res.Location)->Line);
+    }
+
+    if (!res.Stacks.empty()) {
+      Json::Value jsonStacks(Json::arrayValue);
+      for (auto const& stack : res.Stacks) {
+        Json::Value jsonStack(Json::objectValue);
+        Json::Value jsonFrames(Json::arrayValue);
+        for (auto const& frame : stack.Frames) {
+          Json::Value jsonFrame(Json::objectValue);
+          if (frame.Location) {
+            jsonFrame["location"]["physicalLocation"]["artifactLocation"]
+                     ["uri"] = (frame.Location)->Uri;
+            jsonFrame["location"]["physicalLocation"]["region"]["startLine"] =
+              Json::Int64((frame.Location)->Line);
+          }
+          jsonFrames.append(jsonFrame);
+        }
+        jsonStack["frames"] = jsonFrames;
+        jsonStacks.append(jsonStack);
+      }
+      jsonResult["stacks"] = jsonStacks;
     }
 
     jsonResults.append(jsonResult);

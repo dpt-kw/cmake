@@ -52,6 +52,19 @@ struct SourceFileLocation
     cmListFileBacktrace const& backtrace);
 };
 
+struct StackFrame
+{
+  cm::optional<SourceFileLocation> Location;
+  std::vector<std::string> Parameters;
+};
+
+struct Stack
+{
+  std::vector<StackFrame> Frames;
+
+  static Stack FromBacktrace(cmListFileBacktrace const& backtrace);
+};
+
 /// @brief A result defined by SARIF reported by a CMake run
 ///
 /// This is the data model for results in a SARIF log. Typically, a result only
@@ -74,6 +87,9 @@ struct Result
 
   /// @brief The index of the rule in the log's rule array (optional)
   cm::optional<std::size_t> RuleIndex;
+
+  /// @brief Call stacks relevant to the result (optional)
+  std::vector<cmSarif::Stack> Stacks;
 
   /// @brief Additional JSON properties for the result (optional)
   ///
