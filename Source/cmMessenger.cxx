@@ -19,8 +19,6 @@
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/SystemInformation.hxx"
-
-#  include "cmSarifLog.h"
 #endif
 
 #ifdef CMake_ENABLE_DEBUGGER
@@ -249,10 +247,9 @@ void cmMessenger::DisplayMessage(MessageType type,
 
   displayMessage(type, category, msg);
 
-#ifndef CMAKE_BOOTSTRAP
-  // Add message to SARIF logs
-  this->SarifLog.LogMessage(type, text, backtrace);
-#endif
+  // Add message to logs
+  this->DisplayedMessages.emplace_back(
+    Message{ type, category, backtrace, text });
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (DebuggerAdapter) {
