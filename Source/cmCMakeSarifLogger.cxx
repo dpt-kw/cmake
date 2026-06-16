@@ -12,6 +12,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmDiagnostics.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -72,6 +73,68 @@ cmSarif::Tool CreateCMakeTool()
   return cmSarif::Tool{ cmDriver };
 }
 
+std::string RuleIdForMessageType(MessageType type,
+                                 cmDiagnosticCategory category)
+{
+  auto name = cmDiagnostics::GetCategoryString(category);
+  if (!name.empty()) {
+    // Strip the "CMD_" prefix from the category name and convert to PascalCase
+    std::string sarifIdName = cmSystemTools::LowerCase(name.substr(4));
+    if (!sarifIdName.empty()) {
+      sarifIdName[0] =
+        cmSystemTools::UpperCase(std::string{ sarifIdName[0] })[0];
+    }
+    for (auto it = sarifIdName.begin(); it != sarifIdName.end(); ++it) {
+      if (*it == '_') {
+        it = sarifIdName.erase(it);
+        if (it != sarifIdName.end()) {
+          *it = cmSystemTools::UpperCase(std::string{ *it })[0];
+        }
+      }
+    }
+    return cmStrCat("CMake.", sarifIdName);
+  }
+
+  // Fallback to message type if not a diagnostic
+  switch (type) {
+    case MessageType::FATAL_ERROR:
+      return "CMake.FatalError";
+    case MessageType::INTERNAL_ERROR:
+      return "CMake.InternalError";
+    case MessageType::WARNING:
+      return "CMake.Warning";
+    default:
+      return "";
+  }
+}
+
+cm::string_view NameForMessageType(MessageType type,
+                                   cmDiagnosticCategory category)
+{
+  if (category != cmDiagnostics::CMD_NONE) {
+    return cmDiagnostics::GetCategoryString(category);
+  }
+  switch (type) {
+    case MessageType::FATAL_ERROR:
+      return "CMake Error";
+    case MessageType::INTERNAL_ERROR:
+      return "CMake Internal Error";
+    case MessageType::WARNING:
+      return "CMake Warning";
+    default:
+      return "";
+  }
+}
+
+cmSarif::ReportingDescriptor ReportingDescriptorForMessageType(
+  MessageType type, cmDiagnosticCategory category)
+{
+  cmSarif::ReportingDescriptor rd;
+  rd.Id = RuleIdForMessageType(type, category);
+  rd.Name = NameForMessageType(type, category);
+  return rd;
+};
+
 cmSarif::ResultSeverityLevel SarifLevelFromMessageType(MessageType type)
 {
   switch (type) {
@@ -83,48 +146,6 @@ cmSarif::ResultSeverityLevel SarifLevelFromMessageType(MessageType type)
     default:
       return cmSarif::ResultSeverityLevel::Note;
   }
-}
-
-cm::string_view MessageRuleId(MessageType type)
-{
-  switch (type) {
-    case MessageType::FATAL_ERROR:
-      return "CMake.FatalError";
-    case MessageType::INTERNAL_ERROR:
-      return "CMake.InternalError";
-    case MessageType::WARNING:
-      return "CMake.Warning";
-    case MessageType::MESSAGE:
-      return "CMake.Message";
-    case MessageType::LOG:
-    default:
-      return "CMake.Log";
-  }
-}
-
-cm::string_view MessageDisplayName(MessageType type)
-{
-  switch (type) {
-    case MessageType::FATAL_ERROR:
-      return "CMake Error";
-    case MessageType::INTERNAL_ERROR:
-      return "CMake Internal Error";
-    case MessageType::WARNING:
-      return "CMake Warning";
-    case MessageType::MESSAGE:
-      return "CMake Message";
-    case MessageType::LOG:
-    default:
-      return "CMake Log";
-  }
-}
-
-cmSarif::ReportingDescriptor RuleForMessageType(MessageType type)
-{
-  cmSarif::ReportingDescriptor rd;
-  rd.Id = MessageRuleId(type);
-  rd.Name = MessageDisplayName(type);
-  return rd;
 }
 
 } // namespace
@@ -190,21 +211,33 @@ bool cmCMakeSarifLogger::WriteFile(std::string const& path,
   // Helper to add rules to the run as encountered in results and get their
   // index for reporting
   std::unordered_map<cm::string_view, std::size_t> ruleIndices;
-  auto use_rule = [&](MessageType t) {
-    auto category_name = MessageRuleId(t);
+  auto use_rule = [&](MessageType type, cmDiagnosticCategory category) {
+    auto category_name = RuleIdForMessageType(type, category);
     auto ruleIt = ruleIndices.find(category_name);
     if (ruleIt != ruleIndices.end()) {
       return std::make_pair(category_name, ruleIt->second);
     }
 
-    run.Tool.Driver.Rules.emplace_back(RuleForMessageType(t));
+    run.Tool.Driver.Rules.emplace_back(
+      ReportingDescriptorForMessageType(type, category));
     ruleIndices.emplace(category_name, run.Tool.Driver.Rules.size() - 1);
     return std::make_pair(category_name, run.Tool.Driver.Rules.size() - 1);
   };
 
   auto cmakeMessages = this->CM.GetMessenger()->GetDisplayedMessages();
   for (auto const& message : cmakeMessages) {
-    std::pair<cm::string_view, std::size_t> ruleInfo = use_rule(message.Type);
+    // SARIF should only emit diagnostic messages, not general messages/logs
+    switch (message.Type) {
+      case MessageType::MESSAGE:
+      case MessageType::LOG:
+      case MessageType::UNDEFINED:
+        continue;
+      default:
+        break;
+    }
+
+    std::pair<cm::string_view, std::size_t> ruleInfo =
+      use_rule(message.Type, message.Category);
 
     cmSarif::Result result;
     result.RuleId = ruleInfo.first;
